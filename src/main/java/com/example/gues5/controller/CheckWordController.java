@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api")
 public class CheckWordController {
     public final CheckWordService checkWordService;
     @GetMapping("/checkword")
