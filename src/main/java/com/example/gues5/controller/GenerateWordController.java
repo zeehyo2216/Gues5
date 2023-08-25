@@ -19,7 +19,7 @@ public class GenerateWordController {
     @PostMapping("/answer")
     public void generateWord(){
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User user = (User) authentication.getPrincipal();
+            User user = (User)authentication.getPrincipal();
             Long userid = user.getId();
             generateWordService.generate(userid);
     }
