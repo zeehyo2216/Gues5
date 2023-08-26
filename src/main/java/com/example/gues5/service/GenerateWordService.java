@@ -2,7 +2,7 @@ package com.example.gues5.service;
 
 import com.example.gues5.domain.User;
 import com.example.gues5.dto.Answer;
-import com.example.gues5.dto.UserRegi;
+import com.example.gues5.dto.UserRegisterRequest;
 import com.example.gues5.dto.WebClientURI;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;

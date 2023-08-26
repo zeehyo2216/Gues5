@@ -10,6 +10,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
@@ -21,30 +23,44 @@ public class WebSecurityConfig {
     // 스프링 시큐리티 기능 비활성화
 //    @Bean
 //    public WebSecurityCustomizer configure() {
-//        return (web) -> web.ignoring()
-//                .requestMatchers(toH2Console())
-//                .requestMatchers("/static/**");
+//        return (web) -> web.ignoring();
+//                //.requestMatchers(toH2Console())
+//                //.requestMatchers("/static/**");
 //    }
 
-    // 특정 HTTP 요청에 대한 웹 기반 보안 구성
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        return http
-//                .authorizeHttpRequests()
-//                .requestMatchers("/login", "/signup", "/user").permitAll()
-//                .anyRequest().authenticated()
-//                .and()
-//                .formLogin() // 폼 기반 로그인 설정
-//                .loginPage("/login")
-//                .defaultSuccessUrl("/home")
-//                .and()
-//                .logout() // 로그아웃 설정
-//                .logoutSuccessUrl("/login")
-//                .invalidateHttpSession(true)
-//                .and()
-//                .csrf().disable() //csrf 비활성화
-//                .build();
-//    }
+     //특정 HTTP 요청에 대한 웹 기반 보안 구성
+    @Bean
+    protected SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
+        //http
+                //.authorizeRequests()
+                //.requestMatchers("/login", "/user/register", "/css/**", "/images/**", "/js/**").permitAll()
+                //.anyRequest().authenticated();
+
+
+                //.and()
+                //.formLogin()
+                //.loginPage("/login")
+                //.loginProcessingUrl("/실제 로그인이 되는 url")
+                //.permitAll();
+
+        //http
+                //.sessionManagement()
+                //.invalidSessionUrl("/로그인페이지")
+
+                //.and()
+                //.logout()
+                //.logoutRequestMatcher(new AntPathRequestMatcher("/실제 로그아웃이 되는 url"))
+                //.invalidateHttpSession(true)
+                //.deleteCookies("JSESSIONID")
+                //.permitAll();
+
+
+        //CSRF 토큰
+        http
+                .csrf((csrf) -> csrf.disable());
+
+        return http.build();
+    }
 
     // 인증 관리자 관련 설정
     @Bean
