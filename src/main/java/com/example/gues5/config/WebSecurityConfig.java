@@ -1,17 +1,27 @@
 package com.example.gues5.config;
 
+import com.example.gues5.model.JwtAuthenticationFilter;
+import com.example.gues5.model.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
@@ -19,46 +29,40 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class WebSecurityConfig {
 
     private final UserDetailsService userService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    // 스프링 시큐리티 기능 비활성화
-//    @Bean
-//    public WebSecurityCustomizer configure() {
-//        return (web) -> web.ignoring();
-//                //.requestMatchers(toH2Console())
-//                //.requestMatchers("/static/**");
-//    }
-
-     //특정 HTTP 요청에 대한 웹 기반 보안 구성
     @Bean
-    protected SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
-        //http
-                //.authorizeRequests()
-                //.requestMatchers("/login", "/user/register", "/css/**", "/images/**", "/js/**").permitAll()
-                //.anyRequest().authenticated();
-
-
-                //.and()
-                //.formLogin()
-                //.loginPage("/login")
-                //.loginProcessingUrl("/실제 로그인이 되는 url")
-                //.permitAll();
-
-        //http
-                //.sessionManagement()
-                //.invalidSessionUrl("/로그인페이지")
-
-                //.and()
-                //.logout()
-                //.logoutRequestMatcher(new AntPathRequestMatcher("/실제 로그아웃이 되는 url"))
-                //.invalidateHttpSession(true)
-                //.deleteCookies("JSESSIONID")
-                //.permitAll();
-
-
-        //CSRF 토큰
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf((csrf) -> csrf.disable());
-
+                .sessionManagement((sessionManagement) ->
+                        sessionManagement
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
+                        .requestMatchers(new AntPathRequestMatcher("/answer")).hasAnyAuthority("user")
+                        .requestMatchers(new AntPathRequestMatcher("/**")).permitAll())
+                .csrf((csrf) -> csrf
+                        .ignoringRequestMatchers(new AntPathRequestMatcher("/**")))
+                .cors(cors -> {
+                            CorsConfigurationSource source = request -> {
+                                // Cors 허용 패턴
+                                CorsConfiguration config = new CorsConfiguration();
+                                config.setAllowedOrigins(
+                                        List.of("*")
+                                );
+                                config.setAllowedMethods(
+                                        List.of("*")
+                                );
+                                return config;
+                            };
+                        cors.configurationSource(source);
+                        }
+                )
+                .headers((headers) -> headers
+                        .addHeaderWriter(new XFrameOptionsHeaderWriter(
+                                XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+        ;
         return http.build();
     }
 

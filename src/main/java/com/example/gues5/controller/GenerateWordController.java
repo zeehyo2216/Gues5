@@ -1,6 +1,7 @@
 package com.example.gues5.controller;
 
 import com.example.gues5.domain.User;
+import com.example.gues5.model.CustomUserDetails;
 import com.example.gues5.service.GenerateWordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -19,8 +20,8 @@ public class GenerateWordController {
     @PostMapping("/answer")
     public void generateWord(){
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            User user = (User)authentication.getPrincipal();
-            Long userid = user.getId();
+            CustomUserDetails customUserDetails = (CustomUserDetails)authentication.getPrincipal();
+            Long userid = customUserDetails.getUser().getId();
             generateWordService.generate(userid);
     }
 }
