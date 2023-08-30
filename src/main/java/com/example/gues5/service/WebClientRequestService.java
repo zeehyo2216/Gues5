@@ -20,9 +20,9 @@ public class WebClientRequestService {
                         .get()
                         .uri(uriBuilder ->
                                 uriBuilder
-                                        .path(webClientURI.getPath())
+                                        .path("")
                                         //.queryParam("code", code)
-                                        .build(webClientURI.getParams()))
+                                        .build()) //webClientURI.getParams() 들어가는 곳
                         .retrieve()
                         .bodyToMono(String.class)
                         .block();

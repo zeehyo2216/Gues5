@@ -75,19 +75,22 @@ public class JwtTokenProvider {
     }
 
     public String resolveToken(HttpServletRequest request){
-        Cookie cookie = WebUtils.getCookie(request, "accessToken");
-        if(cookie != null)
-            return cookie.getValue();
-        else
-            return null;
+        String token = request.getHeader("Authorization");
+        return token;
     }
 
-    // 토큰의 유효성 + 만료일자 확인
     public boolean validateToken(String jwtToken){
-        try{
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken);
+        try {
+            // Bearer 검증
+            if (!jwtToken.substring(0, "BEARER ".length()).equalsIgnoreCase("BEARER ")) {
+                return false;
+            } else {
+                jwtToken = jwtToken.split(" ")[1].trim();
+            }
+            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(jwtToken);
+            // 만료되었을 시 false
             return !claims.getBody().getExpiration().before(new Date());
-        } catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
     }
